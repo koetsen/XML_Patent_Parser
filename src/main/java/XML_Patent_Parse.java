@@ -25,7 +25,7 @@ public class XML_Patent_Parse {
     private boolean foundStartDocument = false;
     private boolean foundClaims = false;
     private boolean foundDocumentNumber = false;
-    private BufferedWriter bWr = null;
+
 
     private StringBuilder stringBldr;
 
@@ -33,18 +33,19 @@ public class XML_Patent_Parse {
         this.stringBldr = new StringBuilder();
     }
 
-     public void devideDescriptionAndClaims(String infile, String outFile) {
-    //public void devideDescriptionAndClaims(InputStream in, String out) {
+    public void devideDescriptionAndClaims(String infile, String outFile) {
+        // public void devideDescriptionAndClaims(InputStream in, String out) {
 
-        // InputStream inStream = in;
+        BufferedReader br = null;
+        BufferedWriter bWr = null;
         XMLInputFactory xmlFac = XMLInputFactory.newInstance();
         XMLOutputFactory outfac = XMLOutputFactory.newInstance();
 
         try {
-            // br = new BufferedReader(new FileReader(infile));
-            BufferedReader br = Files.newBufferedReader(Paths.get(infile), StandardCharsets.UTF_8);
+
+            br = Files.newBufferedReader(Paths.get(infile), StandardCharsets.UTF_8);
             XMLEventReader xmlEventReader = xmlFac.createXMLEventReader(br);
-            BufferedWriter bWr = new BufferedWriter(new FileWriter(outFile));
+            bWr = new BufferedWriter(new FileWriter(outFile));
             XMLStreamWriter xmlWriter = outfac.createXMLStreamWriter(bWr);
 
             while (xmlEventReader.hasNext()) {
@@ -109,25 +110,22 @@ public class XML_Patent_Parse {
             }
 
             xmlWriter.writeEndDocument();
-
-        } catch (FileNotFoundException | XMLStreamException e) {
-
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (XMLStreamException e1) {
+            e1.printStackTrace();
+        } catch (IOException e2) {
+            e2.printStackTrace();
         } finally {
             try {
-
+                br.close();
                 bWr.flush();
                 bWr.close();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             System.out.println("Fettich");
         }
-
     }
 
     private void devideAndWrite(XMLStreamWriter xmlWriter, String startOfStringMatcher, String elementName) {
@@ -193,7 +191,7 @@ public class XML_Patent_Parse {
     }
 
     private String normalizePatentNr(String number) {
-        return number.replaceAll("[\\s+(\\)]", "");
+        return number.replaceAll("[\\s+\\(\\)]", "");
     }
 
     private String getLanguage(String doc) {
@@ -201,6 +199,5 @@ public class XML_Patent_Parse {
         LanguageResult result = langDetector.detect(doc);
         return result.getLanguage();
     }
-
 
 }
